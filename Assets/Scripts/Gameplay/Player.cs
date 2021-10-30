@@ -43,6 +43,14 @@ namespace Gameplay
             DoMovement();
         }
 
+        private void OnTriggerEnter2D(Collider2D col)
+        {
+            if (col.gameObject.CompareTag(Tags.KillZone))
+            {
+                transform.position = new Vector3(0, 0, 0);
+            }
+        }
+
         private void CheckForGroundCollisions()
         {
             var results = new List<Collider2D>();
@@ -51,14 +59,12 @@ namespace Gameplay
         }
 
 
-        private void DoMovement()
+        private void DoMovement()   
         {
-            var isLeftPressed = Input.GetKey(KeyCode.A);
-            var isRightPressed = Input.GetKey(KeyCode.D);
-            if (isLeftPressed ^ isRightPressed)
+            var movementInput = Input.GetAxisRaw(InputAxis.Horizontal);
+            if (Math.Abs(movementInput) > 0.1f)
             {
-                var direction = isLeftPressed ? -1f : 1f;
-                _rigidBody.AddForce(new Vector2(direction, 0) * movementForce);
+                _rigidBody.AddForce(new Vector2(Math.Sign(movementInput), 0) * movementForce);
             }
 
             var rbVelocity = _rigidBody.velocity;
@@ -69,12 +75,18 @@ namespace Gameplay
             }   
         }
 
+        private float _previousJumpInput;
+        
         private void DoJump()
         {
-            if (Input.GetKeyDown(KeyCode.Space) && _onGround)
+            var jumpInput = Input.GetAxisRaw(InputAxis.Jump);
+            var jumpedThisFrame = _previousJumpInput < 0.01f && jumpInput > 0.99f; 
+            if (jumpedThisFrame && _onGround)
             {
                 _rigidBody.AddForce(new Vector2(0, 1) * jumpForce, ForceMode2D.Impulse);
             }
+
+            _previousJumpInput = jumpInput;
         }
     }
 }
