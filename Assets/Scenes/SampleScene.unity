@@ -202,7 +202,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 251989268}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 12.7, y: -5.75, z: 0}
+  m_LocalPosition: {x: 19.46, y: -5.71, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -586,7 +586,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: b4672e969a84fe147964e3879242941c, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
@@ -667,7 +667,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1489006906}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.804524, y: -1.529237, z: 0}
+  m_LocalPosition: {x: 6.05, y: -5.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -686,6 +686,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aaacb51cd3134e14949f250f3b5f4873, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  jumpTimeout: 3
+  jumpDistance: 5
+  viewDistance: 12
+  movementForce: 10
+  maxMovementSpeed: 5
+  jumpForce: 10
+  chanceToJump: 1.2
 --- !u!1 &1650712190
 GameObject:
   m_ObjectHideFlags: 0
@@ -788,7 +795,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1650712190}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.771078, y: -2.9111886, z: 0}
+  m_LocalPosition: {x: -19.09, y: -5.07, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -10,9 +10,9 @@ namespace Gameplay.Player
     [RequireComponent(typeof(Collider2D))]
     public class PlayerMovement : MonoBehaviour
     {
-        [SerializeField] private float movementForce = 3f;
-        [SerializeField] private float jumpForce = 3f;
-        [SerializeField] private float maxSpeed = 5f;
+        [SerializeField] private float movementForce = 50f;
+        [SerializeField] private float jumpForce = 30f;
+        [SerializeField] private float maxSpeed = 8f;
 
         private Rigidbody2D _rigidBody;
         private Collider2D _collider;
