@@ -4,11 +4,11 @@ using System.Linq;
 using Shared;
 using UnityEngine;
 
-namespace Gameplay
+namespace Gameplay.Player
 {
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Collider2D))]
-    public class Player : MonoBehaviour
+    public class PlayerMovement : MonoBehaviour
     {
         [SerializeField] private float movementForce = 3f;
         [SerializeField] private float jumpForce = 3f;
@@ -41,14 +41,6 @@ namespace Gameplay
         {
             CheckForGroundCollisions();
             DoMovement();
-        }
-
-        private void OnTriggerEnter2D(Collider2D col)
-        {
-            if (col.gameObject.CompareTag(Tags.KillZone))
-            {
-                transform.position = new Vector3(0, 0, 0);
-            }
         }
 
         private void CheckForGroundCollisions()

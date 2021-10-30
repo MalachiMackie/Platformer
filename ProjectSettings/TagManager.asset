@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ground
   - KillZone
+  - Goal
   layers:
   - Default
   - TransparentFX
