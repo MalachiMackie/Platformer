@@ -9,13 +9,15 @@ namespace Core
 {
     public class CameraMovement : MonoBehaviour
     {
-        [SerializeField] private Transform player;
         [SerializeField] private float smoothTime;
         [SerializeField] private Vector2 followPlayerOffset;
 
-        private void Awake()
+        private Transform _player;
+
+        private void Start()
         {
-            Helpers.AssertScriptFieldIsAssignedOrQuit(this, x => x.player);
+            _player = GameObject.FindWithTag(Tags.Player)?.transform;
+            Helpers.AssertIsNotNullOrQuit(_player, "Could not find player in scene");
         }
 
         private Vector3 _currentVelocity;
@@ -30,7 +32,7 @@ namespace Core
         {
             var localTransform = transform;
             var transformPosition = localTransform.position;
-            var newPosition = Vector3.SmoothDamp(transformPosition, player.position, ref _currentVelocity, smoothTime);
+            var newPosition = Vector3.SmoothDamp(transformPosition, _player.position, ref _currentVelocity, smoothTime);
             transform.position = new Vector3(newPosition.x + followPlayerOffset.x, newPosition.y + followPlayerOffset.y, transformPosition.z);
         }
     }

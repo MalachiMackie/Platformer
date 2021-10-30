@@ -102,6 +102,14 @@ namespace Shared
                 Quit();
             }
         }
+
+        public static TComponent AssertGameObjectHasComponent<TComponent>(GameObject gameObject)
+            where TComponent : Component
+        {
+            var component = gameObject.GetComponent<TComponent>();
+            AssertIsNotNullOrQuit(component, $"GameObject {gameObject.name} does not have {typeof(TComponent).Name} component");
+            return component;
+        }
         
         public static void Quit()
         {

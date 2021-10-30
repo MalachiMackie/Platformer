@@ -72,7 +72,7 @@ namespace Gameplay.Player
         private void DoJump()
         {
             var jumpInput = Input.GetAxisRaw(InputAxis.Jump);
-            var jumpedThisFrame = _previousJumpInput < 0.01f && jumpInput > 0.99f; 
+            var jumpedThisFrame = _previousJumpInput < 0.01f && jumpInput > 0.99f;
             if (jumpedThisFrame && _onGround)
             {
                 _rigidBody.AddForce(new Vector2(0, 1) * jumpForce, ForceMode2D.Impulse);
