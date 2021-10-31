@@ -49,9 +49,13 @@ namespace Gameplay
             playerBehaviour.Damage(1);
         }
 
+        private void Update()
+        {
+            _timeSinceJumped += Time.deltaTime;
+        }
+
         private void FixedUpdate()
         {
-            _timeSinceJumped += Time.fixedDeltaTime;
             _distanceToPlayer = _playerTransform.position.x - transform.position.x;
             CheckForGroundCollisions();
             FollowPlayer();
@@ -86,7 +90,6 @@ namespace Gameplay
 
         private void TryJump()
         {
-            Debug.Log(_timeSinceJumped);
             if (jumpDistance < Math.Abs(_distanceToPlayer)  || _timeSinceJumped < jumpTimeout || !_onGround)
             {
                 return;
