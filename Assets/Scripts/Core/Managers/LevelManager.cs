@@ -1,13 +1,27 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Gameplay;
 using Gameplay.Player;
 using Shared;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Core.Managers
 {
+    [Serializable]
+    public class EnemyTypeAndPrefabTuple
+    {
+        public Enemy.EnemyType enemyType;
+        public Enemy enemyPrefab;
+    }
+    
     public class LevelManager : Singleton<LevelManager>
     {
+        [SerializeField] private int playerLives = 3;
+        [SerializeField] private EnemyTypeAndPrefabTuple[] enemyPrefabs;
+        [SerializeField] private GameObject playerPrefab;
+        
         private PlayerBehaviour _playerBehaviour;
         private Transform _playerTransform;
         private Transform _startPoint;
@@ -21,23 +35,76 @@ namespace Core.Managers
 
         public void PlayerDied()
         {
-            Helpers.Quit();
+            playerLives -= 1;
+            if (playerLives <= 0)
+            {
+                Helpers.Quit();
+                return;
+            }
+
+            ResetLevel();
         }
 
         private void Start()
         {
+            SetupLevel();
+        }
+
+        private void SetupLevel()
+        {
             _playerBehaviour = GetPlayerBehaviour();
             _playerTransform = _playerBehaviour.transform;
             _startPoint = GetStartPoint();
-            EnsureLevelSetup();
-
-            _playerTransform.position = _startPoint.position;
-        }
-
-        private void EnsureLevelSetup()
-        {
+            
             EnsureKillZoneExists();
             EnsureGoalExists();
+
+            SpawnEnemies(); 
+
+            _playerTransform.position = _startPoint.position;
+
+            foreach (var requiresSetup in FindObjectsOfType<Object>())
+            {
+                if (requiresSetup is IRequireSetup requireSetup)
+                {
+                    requireSetup.Setup();
+                }
+            }
+            
+        }
+
+        private void ResetLevel()
+        {
+            foreach (var enemy in FindObjectsOfType<Enemy>())
+            {
+                Destroy(enemy.gameObject);
+            }
+
+            _playerTransform = null;
+            _playerBehaviour = null;
+            foreach (var player in FindObjectsOfType<PlayerBehaviour>())
+            {
+                Destroy(player.gameObject);
+            }
+
+            StartCoroutine(Helpers.DoNextFrame(this, x => x.SetupLevel()));
+            
+        }
+
+        private void SpawnEnemies()
+        {
+            var enemyTypesCount = Enum.GetValues(typeof(Enemy.EnemyType)).Length;
+            var enemyPrefabsCount = enemyPrefabs.Length;
+            Helpers.AssertIsTrueOrQuit(enemyPrefabsCount == enemyTypesCount,
+                $"Expected {enemyTypesCount} enemy prefabs, but got {enemyPrefabsCount}");
+            Helpers.AssertIsTrueOrQuit(enemyPrefabs.Select(x => x.enemyType).Distinct().Count() == enemyTypesCount,
+                "enemyPrefabs should only have one of each enemy type");
+            var enemyTypesDictionary = enemyPrefabs.ToDictionary(x => x.enemyType);
+            foreach (var enemySpawn in FindObjectsOfType<EnemySpawn>())
+            {
+                var spawnTransform = enemySpawn.transform;
+                Instantiate(enemyTypesDictionary[enemySpawn.type].enemyPrefab, spawnTransform.position, spawnTransform.rotation);
+            }
         }
 
         private Transform GetStartPoint()
@@ -49,8 +116,8 @@ namespace Core.Managers
 
         private PlayerBehaviour GetPlayerBehaviour()
         {
-            var player = GameObject.FindWithTag(Tags.Player);
-            Helpers.AssertIsNotNullOrQuit(player, "Could not find player in scene");
+            Helpers.AssertScriptFieldIsAssignedOrQuit(this, x => x.playerPrefab);
+            var player = Instantiate(playerPrefab);
             return Helpers.AssertGameObjectHasComponent<PlayerBehaviour>(player);
         }
 

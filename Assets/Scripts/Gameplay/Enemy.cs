@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core;
 using Gameplay.Player;
 using Shared;
 using UnityEngine;
@@ -10,7 +11,7 @@ namespace Gameplay
 {
     [RequireComponent(typeof(Collider2D))]
     [RequireComponent(typeof(Rigidbody2D))]
-    public class Enemy : MonoBehaviour
+    public class Enemy : MonoBehaviour, IRequireSetup
     {
         [SerializeField] private float jumpTimeout = 3f;
         [SerializeField] private float jumpDistance = 5f;
@@ -27,8 +28,9 @@ namespace Gameplay
         private float _timeSinceJumped;
         private float _distanceToPlayer;
         private bool _onGround;
+        private EnemyType _type = EnemyType.Normal;
 
-        private void Awake()
+        public void Setup()
         {
             _timeSinceJumped = jumpTimeout;
         }
@@ -102,6 +104,11 @@ namespace Gameplay
                 _rigidbody.AddForce(new Vector2(0, 1) * jumpForce, ForceMode2D.Impulse);
                 _timeSinceJumped = 0f;                
             }
+        }
+
+        public enum EnemyType
+        {
+            Normal
         }
     }
 }

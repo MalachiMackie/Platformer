@@ -7,28 +7,27 @@ using UnityEngine;
 
 namespace Core
 {
-    public class CameraMovement : MonoBehaviour
+    public class CameraMovement : MonoBehaviour, IRequireSetup
     {
         [SerializeField] private float smoothTime;
         [SerializeField] private Vector2 followPlayerOffset;
 
         private Transform _player;
-
-        private void Start()
-        {
-            _player = GameObject.FindWithTag(Tags.Player)?.transform;
-            Helpers.AssertIsNotNullOrQuit(_player, "Could not find player in scene");
-        }
-
         private Vector3 _currentVelocity;
 
+        public void Setup()
+        {
+            _player = GameObject.FindWithTag(Tags.Player)?.transform;
+            Helpers.AssertIsNotNullOrQuit(_player, "Could not find player in scene");   
+        }
+
         // Update is called once per frame
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             FollowPlayer();
         }
 
-        void FollowPlayer()
+        private void FollowPlayer()
         {
             var localTransform = transform;
             var transformPosition = localTransform.position;

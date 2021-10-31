@@ -1,16 +1,17 @@
 ﻿using System;
+using Core;
 using Core.Managers;
 using Shared;
 using UnityEngine;
 
 namespace Gameplay.Player
 {
-    public class PlayerBehaviour : MonoBehaviour
+    public class PlayerBehaviour : MonoBehaviour, IRequireSetup
     {
         [SerializeField] private int initialHealth = 1;
         private int _health;
 
-        private void Start()
+        public void Setup()
         {
             _health = initialHealth;
         }
@@ -37,7 +38,6 @@ namespace Gameplay.Player
         private void Died()
         {
             Debug.Log("Ugh");
-            Destroy(gameObject);
             LevelManager.Instance.PlayerDied();
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core;
 using Shared;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace Gameplay.Player
 {
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Collider2D))]
-    public class PlayerMovement : MonoBehaviour
+    public class PlayerMovement : MonoBehaviour, IRequireSetup
     {
         [SerializeField] private float movementForce = 50f;
         [SerializeField] private float jumpForce = 30f;
@@ -21,7 +22,7 @@ namespace Gameplay.Player
         private bool _onGround;
         private float? _timeSinceJumpPressed;
 
-        private void Awake()
+        public void Setup()
         {
             _rigidBody = GetComponent<Rigidbody2D>();
             _collider = GetComponent<Collider2D>();
@@ -29,10 +30,6 @@ namespace Gameplay.Player
             Helpers.AssertIsNotNullOrQuit(_collider, "Could not find collider2d component on player");
 
             _timeSinceJumpPressed = earlyJumpForgiveness;
-        }
-
-        private void Start()
-        {
             CheckForGroundCollisions();
         }
 
