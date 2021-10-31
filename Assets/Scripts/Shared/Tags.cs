@@ -6,5 +6,6 @@
         public const string Player = "Player";
         public const string Goal = "Goal";
         public const string KillZone = "KillZone";
+        public const string StartPoint = "StartPoint";
     }
 }

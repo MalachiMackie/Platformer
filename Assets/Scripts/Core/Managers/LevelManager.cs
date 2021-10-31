@@ -9,6 +9,8 @@ namespace Core.Managers
     public class LevelManager : Singleton<LevelManager>
     {
         private PlayerBehaviour _playerBehaviour;
+        private Transform _playerTransform;
+        private Transform _startPoint;
         
         public void FinishLevel()
         {
@@ -25,7 +27,11 @@ namespace Core.Managers
         private void Start()
         {
             _playerBehaviour = GetPlayerBehaviour();
+            _playerTransform = _playerBehaviour.transform;
+            _startPoint = GetStartPoint();
             EnsureLevelSetup();
+
+            _playerTransform.position = _startPoint.position;
         }
 
         private void EnsureLevelSetup()
@@ -34,10 +40,17 @@ namespace Core.Managers
             EnsureGoalExists();
         }
 
+        private Transform GetStartPoint()
+        {
+            var startPoint = GameObject.FindWithTag(Tags.StartPoint);
+            Helpers.AssertIsNotNullOrQuit(startPoint, "Could not find start point is scene");
+            return startPoint.transform;
+        }
+
         private PlayerBehaviour GetPlayerBehaviour()
         {
             var player = GameObject.FindWithTag(Tags.Player);
-            Helpers.AssertIsNotNullOrQuit(player, "Could find player in scene");
+            Helpers.AssertIsNotNullOrQuit(player, "Could not find player in scene");
             return Helpers.AssertGameObjectHasComponent<PlayerBehaviour>(player);
         }
 
