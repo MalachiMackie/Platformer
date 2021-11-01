@@ -30,6 +30,7 @@ namespace Core.Managers
 
         public event EventHandler GamePaused;
         public event EventHandler GameUnpaused;
+        public event EventHandler<int> PlayerLivesChanged;
         
         public void FinishLevel()
         {
@@ -106,6 +107,8 @@ namespace Core.Managers
                     requireSetup.Setup();
                 }
             }
+            
+            PlayerLivesChanged?.Invoke(this, playerLives);
             
         }
 

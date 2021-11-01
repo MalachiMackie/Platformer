@@ -2,7 +2,7 @@
 using Core.Managers;
 using UnityEngine;
 
-namespace Core.Menus
+namespace Core.UI.Menus
 {
     public class PauseMenu : MonoBehaviour, IRequireSetup
     {
