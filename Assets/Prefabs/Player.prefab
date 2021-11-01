@@ -265,6 +265,22 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: a087310b-e76a-46e4-a1b7-23b60ae3ca66
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8866699844217469984}
+        m_TargetAssemblyTypeName: Gameplay.Player.PlayerInputManager, Assembly-CSharp
+        m_MethodName: PauseInputCallback
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
+    m_ActionId: e46be55f-ce89-4b9e-b16e-e33a4e769976
+    m_ActionName: Player/Pause[/Keyboard/escape]
   m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player

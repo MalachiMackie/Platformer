@@ -22,6 +22,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "e46be55f-ce89-4b9e-b16e-e33a4e769976",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -66,6 +75,17 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6df1cf74-65e3-44d9-9ea2-b9a7f9a5c857",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Pause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -586,6 +606,12 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Menus",
+            "id": "87769923-d10e-4ac6-8a58-158bf0e81afb",
+            "actions": [],
+            "bindings": []
         }
     ],
     "controlSchemes": [

@@ -1,7 +1,5 @@
-﻿using System;
-using Core;
+﻿using Core;
 using Core.Managers;
-using Shared;
 using UnityEngine;
 
 namespace Gameplay.Player
@@ -37,7 +35,6 @@ namespace Gameplay.Player
 
         private void Died()
         {
-            Debug.Log("Ugh");
             LevelManager.Instance.PlayerDied();
         }
     }

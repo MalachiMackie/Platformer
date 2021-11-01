@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Core.Managers;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Gameplay.Player
@@ -41,6 +42,14 @@ namespace Gameplay.Player
         {
             _jumpDown = ctx.action.WasPressedThisFrame();
             _unsetJumpDown = true;
+        }
+
+        public void PauseInputCallback(InputAction.CallbackContext ctx)
+        {
+            if (ctx.performed)
+            {
+                LevelManager.Instance.TogglePause();
+            }
         }
 
         private void LateUpdate()

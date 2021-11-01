@@ -25,6 +25,11 @@ namespace Core.Managers
         private PlayerBehaviour _playerBehaviour;
         private Transform _playerTransform;
         private Transform _startPoint;
+
+        private bool _paused;
+
+        public event EventHandler GamePaused;
+        public event EventHandler GameUnpaused;
         
         public void FinishLevel()
         {
@@ -43,6 +48,37 @@ namespace Core.Managers
             }
 
             ResetLevel();
+        }
+
+        public void TogglePause()
+        {
+            if (_paused)
+            {
+                Unpause();
+            }
+            else
+            {
+                Pause();
+            }
+        }
+
+        public void Pause()
+        {
+            Time.timeScale = 0f;
+            _paused = true;
+            GamePaused?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void Unpause()
+        {
+            Time.timeScale = 1f;
+            _paused = false;
+            GameUnpaused?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void Quit()
+        {
+            Helpers.Quit();
         }
 
         private void Start()
