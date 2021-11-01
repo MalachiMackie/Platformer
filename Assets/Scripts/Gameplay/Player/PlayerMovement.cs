@@ -9,6 +9,7 @@ namespace Gameplay.Player
 {
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Collider2D))]
+    [RequireComponent(typeof(PlayerInputManager))]
     public class PlayerMovement : MonoBehaviour, IRequireSetup
     {
         [SerializeField] private float movementForce = 50f;
@@ -18,6 +19,7 @@ namespace Gameplay.Player
 
         private Rigidbody2D _rigidBody;
         private Collider2D _collider;
+        private PlayerInputManager _inputManager;
 
         private bool _onGround;
         private float? _timeSinceJumpPressed;
@@ -26,8 +28,10 @@ namespace Gameplay.Player
         {
             _rigidBody = GetComponent<Rigidbody2D>();
             _collider = GetComponent<Collider2D>();
+            _inputManager = GetComponent<PlayerInputManager>();
             Helpers.AssertIsNotNullOrQuit(_rigidBody, "Could not find rigidbody2d component on player");
             Helpers.AssertIsNotNullOrQuit(_collider, "Could not find collider2d component on player");
+            Helpers.AssertIsNotNullOrQuit(_inputManager, "Could not find input manager component on player");
 
             _timeSinceJumpPressed = earlyJumpForgiveness;
             CheckForGroundCollisions();
@@ -58,7 +62,7 @@ namespace Gameplay.Player
 
         private void DoMovement()
         {
-            var movementInput = Input.GetAxisRaw(InputAxis.Horizontal);
+            var movementInput = _inputManager.GetMoveInput();
             if (Math.Abs(movementInput) > 0.1f)
             {
                 _rigidBody.AddForce(new Vector2(Math.Sign(movementInput), 0) * movementForce);
@@ -72,8 +76,6 @@ namespace Gameplay.Player
             }
         }
 
-        private float _previousJumpInput;
-
         /// <summary>
         /// Tries to jump if the jump button was pressed this frame.
         /// If the player tries to jump just before they land (less that <see cref="earlyJumpForgiveness"/> seconds),
@@ -81,8 +83,7 @@ namespace Gameplay.Player
         /// </summary>
         private void DoJump()
         {
-            var jumpInput = Input.GetAxisRaw(InputAxis.Jump);
-            var jumpedThisFrame = _previousJumpInput < 0.01f && jumpInput > 0.99f;
+            var jumpedThisFrame = _inputManager.WasJumpPressedThisFrame();
 
             if (jumpedThisFrame && !_onGround)
             {
@@ -94,8 +95,6 @@ namespace Gameplay.Player
                 _rigidBody.AddForce(new Vector2(0, 1) * jumpForce, ForceMode2D.Impulse);
                 _timeSinceJumpPressed = null;
             }
-
-            _previousJumpInput = jumpInput;
         }
     }
 }
