@@ -9,6 +9,7 @@ TagManager:
   - Enemy
   - KillZone
   - StartPoint
+  - Collectable
   layers:
   - Default
   - TransparentFX

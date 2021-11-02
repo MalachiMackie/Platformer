@@ -7,5 +7,6 @@
         public const string Goal = "Goal";
         public const string KillZone = "KillZone";
         public const string StartPoint = "StartPoint";
+        public const string Collectable = "Collectable";
     }
 }

@@ -21,22 +21,35 @@ namespace Core.Managers
         [SerializeField] private int playerLives = 3;
         [SerializeField] private EnemyTypeAndPrefabTuple[] enemyPrefabs;
         [SerializeField] private GameObject playerPrefab;
+        [SerializeField] private GameObject collectablePrefab;
         
         private PlayerBehaviour _playerBehaviour;
         private Transform _playerTransform;
         private Transform _startPoint;
+        private readonly HashSet<int> _collectedCollectables = new();
+        private int _totalCollectables;
 
         private bool _paused;
 
         public event EventHandler GamePaused;
         public event EventHandler GameUnpaused;
         public event EventHandler<int> PlayerLivesChanged;
-        
+        public event EventHandler<int> PlayerPickedUpCollectable;
+
+        public int GetTotalCollectables() => _totalCollectables;
+        public int GetTotalCollectedCollectables() => _collectedCollectables.Count;
+
         public void FinishLevel()
         {
             _playerBehaviour.ReachedGoal();
             Debug.Log("Well Done!");
             Helpers.Quit();
+        }
+
+        public void OnPlayerPickedUpCollectable(int collectableNum)
+        {
+            _collectedCollectables.Add(collectableNum);
+            PlayerPickedUpCollectable?.Invoke(this, _collectedCollectables.Count);
         }
 
         public void PlayerDied()
@@ -97,6 +110,7 @@ namespace Core.Managers
             EnsureGoalExists();
 
             SpawnEnemies(); 
+            SpawnCollectables();
 
             _playerTransform.position = _startPoint.position;
 
@@ -118,13 +132,11 @@ namespace Core.Managers
             {
                 Destroy(enemy.gameObject);
             }
+            
+            Destroy(_playerBehaviour.gameObject);
 
             _playerTransform = null;
             _playerBehaviour = null;
-            foreach (var player in FindObjectsOfType<PlayerBehaviour>())
-            {
-                Destroy(player.gameObject);
-            }
 
             StartCoroutine(Helpers.DoNextFrame(this, x => x.SetupLevel()));
             
@@ -144,6 +156,28 @@ namespace Core.Managers
                 var spawnTransform = enemySpawn.transform;
                 Instantiate(enemyTypesDictionary[enemySpawn.type].enemyPrefab, spawnTransform.position, spawnTransform.rotation);
             }
+        }
+
+        private void SpawnCollectables()
+        {
+            Helpers.AssertScriptFieldIsAssignedOrQuit(this, x => x.collectablePrefab);
+            var collectableSpawns = FindObjectsOfType<CollectableSpawn>();
+            var distinctCollectableSpawnsCount =
+                collectableSpawns.Select(x => x.GetCollectableNum()).Distinct().Count();
+            Helpers.AssertIsTrueOrQuit(distinctCollectableSpawnsCount == collectableSpawns.Length, 
+                "Each collectable spawn must have a unique number");
+            foreach (var collectableSpawn in collectableSpawns)
+            {
+                if (_collectedCollectables.Contains(collectableSpawn.GetCollectableNum()))
+                {
+                    continue;
+                }
+                var spawnTransform = collectableSpawn.transform;
+                var collectable = Instantiate(collectablePrefab, spawnTransform.position, spawnTransform.rotation);
+                collectable.GetComponent<Collectable>().SetCollectableNum(collectableSpawn.GetCollectableNum());
+            }
+
+            _totalCollectables = collectableSpawns.Length;
         }
 
         private Transform GetStartPoint()

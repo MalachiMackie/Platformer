@@ -10,15 +10,11 @@ namespace Gameplay
     {
         private void OnTriggerEnter2D(Collider2D col)
         {
-            switch (col.gameObject.tag)
+            if (col.gameObject.CompareTag(Tags.Player))
             {
-                case Tags.Player:
-                {
-                    var playerBehaviour = col.gameObject.GetComponent<PlayerBehaviour>();
-                    Helpers.AssertIsNotNullOrQuit(playerBehaviour, "GameObject tagged with Player does not have PlayerBehaviour component");
-                    playerBehaviour.ResetPosition();
-                    break;
-                }
+                var playerBehaviour = col.gameObject.GetComponent<PlayerBehaviour>();
+                Helpers.AssertIsNotNullOrQuit(playerBehaviour, "GameObject tagged with Player does not have PlayerBehaviour component");
+                playerBehaviour.FellOutOfWorld();
             }
         }
     }

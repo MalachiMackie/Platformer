@@ -1,5 +1,7 @@
-﻿using Core;
+﻿using System;
+using Core;
 using Core.Managers;
+using Shared;
 using UnityEngine;
 
 namespace Gameplay.Player
@@ -19,9 +21,9 @@ namespace Gameplay.Player
             Debug.Log("Yay!");
         }
 
-        public void ResetPosition()
+        public void FellOutOfWorld()
         {
-            transform.position = new Vector3(0, 0, 0);
+            Died();
         }
 
         public void Damage(int damagePoints)
