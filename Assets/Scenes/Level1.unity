@@ -1992,7 +1992,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerLives: 3
-  currentLevel: 0
 --- !u!1 &2038750466
 GameObject:
   m_ObjectHideFlags: 0
