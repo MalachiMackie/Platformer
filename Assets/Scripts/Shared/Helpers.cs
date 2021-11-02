@@ -27,6 +27,11 @@ namespace Shared
             action(param);
         }
 
+        public static bool IsDontDestroyOnLoad(GameObject go)
+        {
+            return go.scene.buildIndex == -1;
+        }
+
         public static IEnumerator DoNextFrame(Action action)
         {
             yield return 0;

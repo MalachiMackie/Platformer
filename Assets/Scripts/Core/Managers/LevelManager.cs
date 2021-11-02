@@ -18,7 +18,6 @@ namespace Core.Managers
     
     public class LevelManager : Singleton<LevelManager>
     {
-        [SerializeField] private int playerLives = 3;
         [SerializeField] private EnemyTypeAndPrefabTuple[] enemyPrefabs;
         [SerializeField] private GameObject playerPrefab;
         [SerializeField] private GameObject collectablePrefab;
@@ -29,11 +28,6 @@ namespace Core.Managers
         private readonly HashSet<int> _collectedCollectables = new();
         private int _totalCollectables;
 
-        private bool _paused;
-
-        public event EventHandler GamePaused;
-        public event EventHandler GameUnpaused;
-        public event EventHandler<int> PlayerLivesChanged;
         public event EventHandler<int> PlayerPickedUpCollectable;
 
         public int GetTotalCollectables() => _totalCollectables;
@@ -54,45 +48,12 @@ namespace Core.Managers
 
         public void PlayerDied()
         {
-            playerLives -= 1;
-            if (playerLives <= 0)
+            GameManager.Instance.PlayerDied();
+            if (GameManager.Instance.PlayerHasMoreLives())
             {
-                Helpers.Quit();
-                return;
+                ResetLevel();
+                StartCoroutine(Helpers.DoNextFrame(this, x => x.SetupLevel()));
             }
-
-            ResetLevel();
-        }
-
-        public void TogglePause()
-        {
-            if (_paused)
-            {
-                Unpause();
-            }
-            else
-            {
-                Pause();
-            }
-        }
-
-        public void Pause()
-        {
-            Time.timeScale = 0f;
-            _paused = true;
-            GamePaused?.Invoke(this, EventArgs.Empty);
-        }
-
-        public void Unpause()
-        {
-            Time.timeScale = 1f;
-            _paused = false;
-            GameUnpaused?.Invoke(this, EventArgs.Empty);
-        }
-
-        public void Quit()
-        {
-            Helpers.Quit();
         }
 
         private void Start()
@@ -121,9 +82,6 @@ namespace Core.Managers
                     requireSetup.Setup();
                 }
             }
-            
-            PlayerLivesChanged?.Invoke(this, playerLives);
-            
         }
 
         private void ResetLevel()
@@ -132,13 +90,16 @@ namespace Core.Managers
             {
                 Destroy(enemy.gameObject);
             }
+
+            foreach (var collectable in FindObjectsOfType<Collectable>())
+            {
+                Destroy(collectable.gameObject);
+            }
             
             Destroy(_playerBehaviour.gameObject);
 
             _playerTransform = null;
             _playerBehaviour = null;
-
-            StartCoroutine(Helpers.DoNextFrame(this, x => x.SetupLevel()));
             
         }
 

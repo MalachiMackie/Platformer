@@ -48,7 +48,7 @@ namespace Gameplay.Player
         {
             if (ctx.performed)
             {
-                LevelManager.Instance.TogglePause();
+                GameManager.Instance.TogglePause();
             }
         }
 

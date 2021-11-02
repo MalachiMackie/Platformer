@@ -8,19 +8,19 @@ namespace Core.UI.Menus
     {
         public void Setup()
         {
-            LevelManager.Instance.GamePaused += OnGamePaused;
-            LevelManager.Instance.GameUnpaused += OnGameUnpaused;
+            GameManager.Instance.GamePaused += OnGamePaused;
+            GameManager.Instance.GameUnpaused += OnGameUnpaused;
             gameObject.SetActive(false);
         }
 
         public void Resume()
         {
-            LevelManager.Instance.Unpause();
+            GameManager.Instance.Unpause();
         }
 
         public void Quit()
         {
-            LevelManager.Instance.Quit();
+            GameManager.Instance.Quit();
         }
 
         private void OnGamePaused(object sender, EventArgs e)

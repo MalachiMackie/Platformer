@@ -23,20 +23,21 @@ namespace Core.UI
             Helpers.AssertIsTrueOrQuit(!string.IsNullOrWhiteSpace(collectablesTextFormat), "hud Player lives text format is not set");
 
             _totalCollectables = LevelManager.Instance.GetTotalCollectables();
-            OnPlayerPickedUpCollectable(this, LevelManager.Instance.GetTotalCollectedCollectables());
+            SetCollectables(LevelManager.Instance.GetTotalCollectedCollectables(), _totalCollectables);
+            SetPlayerLives(GameManager.Instance.GetPlayerLives());
             
-            LevelManager.Instance.PlayerLivesChanged += OnPlayerLivesChanged;
-            LevelManager.Instance.PlayerPickedUpCollectable += OnPlayerPickedUpCollectable;
+            GameManager.Instance.PlayerLivesChanged += (_, lives) => SetPlayerLives(lives);
+            LevelManager.Instance.PlayerPickedUpCollectable += (_, collected) => SetCollectables(collected, _totalCollectables);
         }
 
-        private void OnPlayerPickedUpCollectable(object sender, int e)
+        private void SetCollectables(int collected, int total)
         {
-            collectablesText.text = string.Format(collectablesTextFormat, e, _totalCollectables);
+            collectablesText.text = string.Format(collectablesTextFormat, collected, total);
         }
 
-        private void OnPlayerLivesChanged(object sender, int e)
+        private void SetPlayerLives(int lives)
         {
-            playerLivesText.text = string.Format(playerLivesTextFormat, e);
+            playerLivesText.text = string.Format(playerLivesTextFormat, lives);
         }
     }
 }
