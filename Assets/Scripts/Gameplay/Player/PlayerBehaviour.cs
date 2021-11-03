@@ -1,7 +1,5 @@
-﻿using System;
-using Core;
+﻿using Core;
 using Core.Managers;
-using Shared;
 using UnityEngine;
 
 namespace Gameplay.Player
@@ -14,11 +12,6 @@ namespace Gameplay.Player
         public void Setup()
         {
             _health = initialHealth;
-        }
-
-        public void ReachedGoal()
-        {
-            Debug.Log("Yay!");
         }
 
         public void FellOutOfWorld()

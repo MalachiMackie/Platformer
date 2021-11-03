@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core.Spawns;
 using Gameplay;
 using Gameplay.Player;
 using Shared;
@@ -33,9 +34,9 @@ namespace Core.Managers
         public int GetTotalCollectables() => _totalCollectables;
         public int GetTotalCollectedCollectables() => _collectedCollectables.Count;
 
+        // ReSharper disable once MemberCanBeMadeStatic.Global
         public void FinishLevel()
         {
-            _playerBehaviour.ReachedGoal();
             GameManager.Instance.LevelFinished();
         }
 
@@ -48,11 +49,10 @@ namespace Core.Managers
         public void PlayerDied()
         {
             GameManager.Instance.PlayerDied();
-            if (GameManager.Instance.PlayerHasMoreLives())
-            {
-                ResetLevel();
-                StartCoroutine(Helpers.DoNextFrame(this, x => x.SetupLevel()));
-            }
+            if (!GameManager.Instance.PlayerHasMoreLives()) return;
+            
+            ResetLevel();
+            StartCoroutine(Helpers.DoNextFrame(this, x => x.SetupLevel()));
         }
 
         protected override void OnSingletonStart()

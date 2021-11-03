@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Core
+namespace Core.Spawns
 {
     public class CollectableSpawn : MonoBehaviour
     {

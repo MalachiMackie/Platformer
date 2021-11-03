@@ -28,7 +28,6 @@ namespace Gameplay
         private float _timeSinceJumped;
         private float _distanceToPlayer;
         private bool _onGround;
-        private EnemyType _type = EnemyType.Normal;
 
         public void Setup()
         {

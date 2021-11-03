@@ -1,6 +1,4 @@
-﻿using System;
-using Core.Managers;
-using Gameplay.Player;
+﻿using Core.Managers;
 using Shared;
 using UnityEngine;
 

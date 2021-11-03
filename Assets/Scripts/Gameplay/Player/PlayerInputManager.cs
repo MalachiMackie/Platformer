@@ -1,6 +1,7 @@
 ﻿using Core.Managers;
 using UnityEngine;
 using UnityEngine.InputSystem;
+// ReSharper disable UnusedMember.Global
 
 namespace Gameplay.Player
 {

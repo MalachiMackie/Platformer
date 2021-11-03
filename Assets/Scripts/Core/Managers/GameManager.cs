@@ -19,7 +19,6 @@ namespace Core.Managers
         private int _currentLevel;
         private int _lastLevel;
         private bool _paused;
-        private Guid _id = Guid.NewGuid();
 
         public void LevelFinished()
         {
@@ -65,7 +64,7 @@ namespace Core.Managers
             }
         }
 
-        public void Pause()
+        private void Pause()
         {
             Time.timeScale = 0f;
             _paused = true;
@@ -94,8 +93,6 @@ namespace Core.Managers
         {
             _currentLevel = SceneManager.GetActiveScene().buildIndex;
             _lastLevel = SceneManager.sceneCountInBuildSettings - 1;
-            Debug.Log(_currentLevel);
-            Debug.Log(_lastLevel);
         }
 
         private void EnsureOnlyOneGameManager()

@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Gameplay;
 using Shared;
 using UnityEngine;
 
@@ -9,7 +5,7 @@ namespace Core
 {
     public class CameraMovement : MonoBehaviour, IRequireSetup
     {
-        [SerializeField] private float smoothTime;
+        [SerializeField] private float smoothTime = 0.15f;
         [SerializeField] private Vector2 followPlayerOffset;
 
         private Transform _player;
@@ -21,7 +17,6 @@ namespace Core
             Helpers.AssertIsNotNullOrQuit(_player, "Could not find player in scene");   
         }
 
-        // Update is called once per frame
         private void FixedUpdate()
         {
             FollowPlayer();

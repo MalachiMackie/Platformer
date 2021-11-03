@@ -1,4 +1,5 @@
-﻿namespace Shared
+﻿// ReSharper disable UnusedMember.Global
+namespace Shared
 {
     public static class Tags
     {

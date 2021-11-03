@@ -1,5 +1,4 @@
-﻿using System;
-using Core.Managers;
+﻿using Core.Managers;
 using Shared;
 using UnityEngine;
 

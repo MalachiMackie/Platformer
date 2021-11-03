@@ -1,5 +1,4 @@
-﻿using System;
-using Gameplay.Player;
+﻿using Gameplay.Player;
 using Shared;
 using UnityEngine;
 
