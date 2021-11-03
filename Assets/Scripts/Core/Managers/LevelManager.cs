@@ -36,8 +36,7 @@ namespace Core.Managers
         public void FinishLevel()
         {
             _playerBehaviour.ReachedGoal();
-            Debug.Log("Well Done!");
-            Helpers.Quit();
+            GameManager.Instance.LevelFinished();
         }
 
         public void OnPlayerPickedUpCollectable(int collectableNum)
@@ -56,7 +55,7 @@ namespace Core.Managers
             }
         }
 
-        private void Start()
+        protected override void OnSingletonStart()
         {
             SetupLevel();
         }

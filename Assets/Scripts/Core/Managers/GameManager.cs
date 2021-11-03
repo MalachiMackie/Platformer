@@ -2,18 +2,37 @@
 using System.Linq;
 using Shared;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Core.Managers
 {
     public class GameManager : Singleton<GameManager>
     {
         
-        [SerializeField] private int playerLives = 3;
-
-        private bool _paused;
         public event EventHandler GamePaused;
         public event EventHandler GameUnpaused;
         public event EventHandler<int> PlayerLivesChanged;
+        
+        [SerializeField] private int playerLives = 3;
+
+
+        private int _currentLevel;
+        private int _lastLevel;
+        private bool _paused;
+        private Guid _id = Guid.NewGuid();
+
+        public void LevelFinished()
+        {
+            if (_currentLevel == _lastLevel)
+            {
+                Helpers.Quit();
+                return;
+            }
+
+            _currentLevel++;
+            SceneManager.LoadScene(_currentLevel);
+
+        }        
 
         public void PlayerDied()
         {
@@ -68,40 +87,44 @@ namespace Core.Managers
         private void Awake()
         {
             EnsureOnlyOneGameManager();
+            GetLevelNumbers();
+        }
+
+        private void GetLevelNumbers()
+        {
+            _currentLevel = SceneManager.GetActiveScene().buildIndex;
+            _lastLevel = SceneManager.sceneCountInBuildSettings - 1;
+            Debug.Log(_currentLevel);
+            Debug.Log(_lastLevel);
         }
 
         private void EnsureOnlyOneGameManager()
         {
-            if (Helpers.IsDontDestroyOnLoad(gameObject))
-            {
-                return;
-            }
-            
             var gameManagers = FindObjectsOfType<GameManager>();
             if (gameManagers.Length == 1)
             {
                 DontDestroyOnLoad(gameObject);
+                SingletonInstance = this;
                 return;
             }
 
-            var foundDontDestroyOnLoad = false;
-            
-            foreach (var gameManager in gameManagers)
-            {
-                if (!foundDontDestroyOnLoad && Helpers.IsDontDestroyOnLoad(gameManager.gameObject))
-                {
-                    foundDontDestroyOnLoad = true;
-                    continue;
-                }
+            var isDontDestroyOnLoad = Helpers.IsDontDestroyOnLoad(gameObject);
 
-                if (gameManager != this)
+            if (isDontDestroyOnLoad)
+            {
+                foreach (var manager in gameManagers.Where(x => x != this))
                 {
-                    Debug.Log($"Destroyed {gameManager.gameObject.name}");
-                    Destroy(gameManager.gameObject);
+                    Destroy(manager.gameObject);
                 }
             }
-            DontDestroyOnLoad(gameObject);
-            SingletonInstance = this;
+            
+            Helpers.AssertIsTrueOrQuit(gameManagers.Count(x => Helpers.IsDontDestroyOnLoad(x.gameObject)) == 1,
+                "There was more than one GameManager in the scene, fix your shit!");
+
+            if (!isDontDestroyOnLoad)
+            {
+                Destroy(gameObject);
+            }
         }
 
     }
