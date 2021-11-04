@@ -42,6 +42,7 @@ namespace Core.Managers
         public void FinishLevel()
         {
             _isLevelFinished = true;
+            DisableEnemies();
             LevelEnded?.Invoke(this, EventArgs.Empty);
         }
 
@@ -198,6 +199,15 @@ namespace Core.Managers
             foreach (var goal in goals)
             {
                 Helpers.AssertGameObjectHasComponent<Goal>(goal);
+            }
+        }
+
+        private void DisableEnemies()
+        {
+            var enemies = FindObjectsOfType<Enemy>();
+            foreach (var enemy in enemies)
+            {
+                enemy.StopMoving();
             }
         }
 

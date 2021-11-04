@@ -28,10 +28,17 @@ namespace Gameplay
         private float _timeSinceJumped;
         private float _distanceToPlayer;
         private bool _onGround;
+        private bool _canMove = true;
 
         public void Setup()
         {
             _timeSinceJumped = jumpTimeout;
+        }
+
+        public void StopMoving()
+        {
+            _canMove = false;
+            _rigidbody.constraints = RigidbodyConstraints2D.FreezeAll;
         }
 
         private void Start()
@@ -45,7 +52,7 @@ namespace Gameplay
         
         private void OnCollisionEnter2D(Collision2D col)
         {
-            if (!col.gameObject.CompareTag(Tags.Player)) return;
+            if (!col.gameObject.CompareTag(Tags.Player) || !_canMove) return;
             var playerBehaviour = Helpers.AssertGameObjectHasComponent<PlayerBehaviour>(col.gameObject);
             playerBehaviour.Damage(1);
         }
@@ -58,6 +65,8 @@ namespace Gameplay
         private void FixedUpdate()
         {
             _distanceToPlayer = _playerTransform.position.x - transform.position.x;
+            if (!_canMove) return;
+            
             CheckForGroundCollisions();
             FollowPlayer();
             TryJump();
