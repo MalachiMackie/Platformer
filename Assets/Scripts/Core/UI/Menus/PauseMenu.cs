@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.UI.Menus
 {
-    public class PauseMenu : MonoBehaviour, IRequireSetup
+    public class PauseMenu : MonoBehaviour, IRequireSetup, IRequireTareDown
     {
         public void Setup()
         {
@@ -31,6 +31,12 @@ namespace Core.UI.Menus
         private void OnGameUnpaused(object sender, EventArgs e)
         {
             gameObject.SetActive(false);
+        }
+
+        public void TareDown()
+        {
+            GameManager.Instance.GamePaused -= OnGamePaused;
+            GameManager.Instance.GameUnpaused -= OnGameUnpaused;
         }
     }
 }

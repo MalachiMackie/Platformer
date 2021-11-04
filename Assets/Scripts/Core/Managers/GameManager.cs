@@ -20,6 +20,8 @@ namespace Core.Managers
         private int _lastLevel;
         private bool _paused;
 
+        public bool HasNextLevel() => _currentLevel != _lastLevel;
+
         public void LevelFinished()
         {
             if (_currentLevel == _lastLevel)

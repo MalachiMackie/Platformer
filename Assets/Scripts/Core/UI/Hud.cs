@@ -1,11 +1,12 @@
-﻿using Core.Managers;
+﻿using System;
+using Core.Managers;
 using Shared;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Core.UI
 {
-    public class Hud : MonoBehaviour, IRequireSetup
+    public class Hud : MonoBehaviour, IRequireSetup, IRequireTareDown
     {
         [SerializeField] private Text playerLivesText;
         [SerializeField] private string playerLivesTextFormat;
@@ -26,8 +27,36 @@ namespace Core.UI
             SetCollectables(LevelManager.Instance.GetTotalCollectedCollectables(), _totalCollectables);
             SetPlayerLives(GameManager.Instance.GetPlayerLives());
             
-            GameManager.Instance.PlayerLivesChanged += (_, lives) => SetPlayerLives(lives);
-            LevelManager.Instance.PlayerPickedUpCollectable += (_, collected) => SetCollectables(collected, _totalCollectables);
+            GameManager.Instance.PlayerLivesChanged += OnPlayerLivesChanged;
+            LevelManager.Instance.PlayerPickedUpCollectable += OnPlayerPickedUpCollectable;
+            LevelManager.Instance.LevelEnded += OnLevelEnded;
+            LevelManager.Instance.LevelRestarted += OnLevelRestarted;
+            LevelManager.Instance.NextLevelStarted += OnNextLevelStarted;
+        }
+
+        private void OnNextLevelStarted(object sender, EventArgs e)
+        {
+            gameObject.SetActive(true);
+        }
+
+        private void OnLevelRestarted(object sender, EventArgs e)
+        {
+            gameObject.SetActive(true);
+        }
+
+        private void OnLevelEnded(object sender, EventArgs e)
+        {
+            gameObject.SetActive(false);
+        }
+
+        private void OnPlayerPickedUpCollectable(object sender, int collected)
+        {
+            SetCollectables(collected, _totalCollectables);
+        }
+
+        private void OnPlayerLivesChanged(object sender, int lives)
+        {
+            SetPlayerLives(lives);
         }
 
         private void SetCollectables(int collected, int total)
@@ -38,6 +67,15 @@ namespace Core.UI
         private void SetPlayerLives(int lives)
         {
             playerLivesText.text = string.Format(playerLivesTextFormat, lives);
+        }
+
+        public void TareDown()
+        {
+            GameManager.Instance.PlayerLivesChanged -= OnPlayerLivesChanged;
+            LevelManager.Instance.PlayerPickedUpCollectable -= OnPlayerPickedUpCollectable;
+            LevelManager.Instance.LevelEnded -= OnLevelEnded;
+            LevelManager.Instance.LevelRestarted -= OnLevelRestarted;
+            LevelManager.Instance.NextLevelStarted -= OnNextLevelStarted;
         }
     }
 }

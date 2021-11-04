@@ -28,7 +28,11 @@ namespace Core.Managers
         private Transform _startPoint;
         private readonly HashSet<int> _collectedCollectables = new();
         private int _totalCollectables;
+        private bool _isLevelFinished;
 
+        public event EventHandler LevelEnded;
+        public event EventHandler NextLevelStarted;
+        public event EventHandler LevelRestarted;
         public event EventHandler<int> PlayerPickedUpCollectable;
 
         public int GetTotalCollectables() => _totalCollectables;
@@ -37,7 +41,26 @@ namespace Core.Managers
         // ReSharper disable once MemberCanBeMadeStatic.Global
         public void FinishLevel()
         {
-            GameManager.Instance.LevelFinished();
+            _isLevelFinished = true;
+            LevelEnded?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void GoToNextLevel()
+        {
+            if (_isLevelFinished)
+            {
+                GameManager.Instance.LevelFinished();
+                NextLevelStarted?.Invoke(this, EventArgs.Empty);
+            }            
+        }
+
+        public void RestartLevel()
+        {
+            if (_isLevelFinished)
+            {
+                ResetLevel();
+                LevelRestarted?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public void OnPlayerPickedUpCollectable(int collectableNum)
@@ -50,7 +73,7 @@ namespace Core.Managers
         {
             GameManager.Instance.PlayerDied();
             if (!GameManager.Instance.PlayerHasMoreLives()) return;
-            
+
             ResetLevel();
             StartCoroutine(Helpers.DoNextFrame(this, x => x.SetupLevel()));
         }
@@ -65,6 +88,7 @@ namespace Core.Managers
             _playerBehaviour = GetPlayerBehaviour();
             _playerTransform = _playerBehaviour.transform;
             _startPoint = GetStartPoint();
+            _isLevelFinished = false;
             
             EnsureKillZoneExists();
             EnsureGoalExists();
@@ -81,10 +105,13 @@ namespace Core.Managers
                     requireSetup.Setup();
                 }
             }
+
+            Time.timeScale = 1f;
         }
 
         private void ResetLevel()
         {
+            Time.timeScale = 0f;
             foreach (var enemy in FindObjectsOfType<Enemy>())
             {
                 Destroy(enemy.gameObject);
@@ -171,6 +198,15 @@ namespace Core.Managers
             foreach (var goal in goals)
             {
                 Helpers.AssertGameObjectHasComponent<Goal>(goal);
+            }
+        }
+
+        private void OnDisable()
+        {
+            var objects = FindObjectsOfType<MonoBehaviour>();
+            foreach (var requireTareDown in objects.Where(x => x is IRequireTareDown).Cast<IRequireTareDown>())
+            {
+                requireTareDown.TareDown();
             }
         }
     }
