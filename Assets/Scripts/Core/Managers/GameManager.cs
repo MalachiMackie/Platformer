@@ -1,28 +1,30 @@
 ﻿using System;
-using System.Linq;
+using Core.MessageTargets;
+using Core.MessageTargets.GameEvents;
+using Core.MessageTargets.LevelEvents;
+using Core.MessageTargets.PlayerEvents;
 using Shared;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Core.Managers
 {
-    public class GameManager : Singleton<GameManager>
-    {
-        
-        public event EventHandler GamePaused;
-        public event EventHandler GameUnpaused;
-        public event EventHandler<int> PlayerLivesChanged;
-        
+    public class GameManager : MonoBehaviour,
+        IRequestPlayerLivesEventTarget,
+        IGameUnpauseRequestedEventTarget,
+        IGameQuitRequestedEventTarget,
+        IPlayerDiedEventTarget,
+        INextLevelStartedEventTarget,
+        IRequestAnyMoreLevelsEventTarget,
+        IGamePauseToggleRequestedEventTarget
+    {        
         [SerializeField] private int playerLives = 3;
-
 
         private int _currentLevel;
         private int _lastLevel;
         private bool _paused;
 
-        public bool HasNextLevel() => _currentLevel != _lastLevel;
-
-        public void LevelFinished()
+        public void NextLevelStarted()
         {
             if (_currentLevel == _lastLevel)
             {
@@ -30,31 +32,46 @@ namespace Core.Managers
                 return;
             }
 
+            SceneManager.UnloadSceneAsync(_currentLevel);
             _currentLevel++;
-            SceneManager.LoadScene(_currentLevel);
+            SceneManager.LoadScene(_currentLevel, LoadSceneMode.Additive);
+        }
 
-        }        
+        public void RequestAnyMoreLevels(out bool anyMoreLevels)
+        {
+            anyMoreLevels = _currentLevel != _lastLevel;
+        }
 
         public void PlayerDied()
         {
             playerLives -= 1;
-            PlayerLivesChanged?.Invoke(this, playerLives);
+            Helpers.DispatchEvent<IPlayerLivesChangedEventTarget>(x => x.PlayerLivesChanged(playerLives));
 
-            if (!PlayerHasMoreLives())
+            if (playerLives <= 0)
             {
                 Quit();
             }
         }
 
-        public bool PlayerHasMoreLives()
+        public void RequestPlayerLives(out int outPlayerLives)
         {
-            return playerLives >= 1;
+            outPlayerLives = playerLives;
         }
 
-        public int GetPlayerLives() => playerLives;
-        
+        public void GameUnpauseRequested()
+        {
+            if (_paused)
+            {
+                Unpause();                
+            }
+        }
 
-        public void TogglePause()
+        public void GameQuitRequested()
+        {
+            Quit();
+        }
+        
+        public void GamePauseToggleRequested()
         {
             if (_paused)
             {
@@ -70,60 +87,47 @@ namespace Core.Managers
         {
             Time.timeScale = 0f;
             _paused = true;
-            GamePaused?.Invoke(this, EventArgs.Empty);
+            Helpers.DispatchEvent<IGamePausedEventTarget>(x => x.GamePaused());
         }
 
-        public void Unpause()
+        private void Unpause()
         {
             Time.timeScale = 1f;
             _paused = false;
-            GameUnpaused?.Invoke(this, EventArgs.Empty);
+            Helpers.DispatchEvent<IGameUnpausedEventTarget>(x => x.GameUnpaused());
         }
         
-        public void Quit()
+        private static void Quit()
         {
             Helpers.Quit();
         }
 
         private void Awake()
         {
-            EnsureOnlyOneGameManager();
+            Helpers.EnsureAllEventTargetsHaveImplementations();
             GetLevelNumbers();
         }
 
         private void GetLevelNumbers()
         {
-            _currentLevel = SceneManager.GetActiveScene().buildIndex;
-            _lastLevel = SceneManager.sceneCountInBuildSettings - 1;
-        }
-
-        private void EnsureOnlyOneGameManager()
-        {
-            var gameManagers = FindObjectsOfType<GameManager>();
-            if (gameManagers.Length == 1)
+            var sceneCount = SceneManager.sceneCount;
+            var foundCurrentLevel = false;
+            for (var i = 0; i < sceneCount; i++)
             {
-                DontDestroyOnLoad(gameObject);
-                SingletonInstance = this;
-                return;
+                var scene = SceneManager.GetSceneAt(i);
+                if (scene.name == "GameManagerScene") continue;
+                
+                _currentLevel = scene.buildIndex;
+                foundCurrentLevel = true;
+                break;
             }
 
-            var isDontDestroyOnLoad = Helpers.IsDontDestroyOnLoad(gameObject);
-
-            if (isDontDestroyOnLoad)
+            if (!foundCurrentLevel)
             {
-                foreach (var manager in gameManagers.Where(x => x != this))
-                {
-                    Destroy(manager.gameObject);
-                }
+                throw new InvalidOperationException("GameManagerScene can not be loaded by itself");
             }
             
-            Helpers.AssertIsTrueOrQuit(gameManagers.Count(x => Helpers.IsDontDestroyOnLoad(x.gameObject)) == 1,
-                "There was more than one GameManager in the scene, fix your shit!");
-
-            if (!isDontDestroyOnLoad)
-            {
-                Destroy(gameObject);
-            }
+            _lastLevel = SceneManager.sceneCountInBuildSettings - 2;
         }
 
     }

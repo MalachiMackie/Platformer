@@ -24,6 +24,10 @@ namespace Core
 
         private void FollowPlayer()
         {
+            if (_player is null)
+            {
+                return;
+            }
             var localTransform = transform;
             var transformPosition = localTransform.position;
             var newPosition = Vector3.SmoothDamp(transformPosition, _player.position, ref _currentVelocity, smoothTime);

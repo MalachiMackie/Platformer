@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core.MessageTargets;
+using Core.MessageTargets.LevelEvents;
+using Core.MessageTargets.PlayerEvents;
 using Core.Spawns;
 using Gameplay;
 using Gameplay.Player;
 using Shared;
+using Shared.Extensions;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using UnityEngine.SceneManagement;
 
 namespace Core.Managers
 {
@@ -17,7 +21,14 @@ namespace Core.Managers
         public Enemy enemyPrefab;
     }
     
-    public class LevelManager : Singleton<LevelManager>
+    public class LevelManager : MonoBehaviour,
+        IPlayerReachedFinishEventTarget,
+        IPlayerCollectedCollectableEventTarget,
+        INextLevelRequestEventTarget,
+        IRestartLevelRequestEventTarget,
+        IRequestTotalCollectablesEventTarget,
+        IRequestCollectedCollectablesEventTarget,
+        IPlayerLivesChangedEventTarget
     {
         [SerializeField] private EnemyTypeAndPrefabTuple[] enemyPrefabs;
         [SerializeField] private GameObject playerPrefab;
@@ -30,56 +41,79 @@ namespace Core.Managers
         private int _totalCollectables;
         private bool _isLevelFinished;
 
-        public event EventHandler LevelEnded;
-        public event EventHandler NextLevelStarted;
-        public event EventHandler LevelRestarted;
-        public event EventHandler<int> PlayerPickedUpCollectable;
-
-        public int GetTotalCollectables() => _totalCollectables;
-        public int GetTotalCollectedCollectables() => _collectedCollectables.Count;
 
         // ReSharper disable once MemberCanBeMadeStatic.Global
-        public void FinishLevel()
+        public void PlayerReachedFinish()
         {
             _isLevelFinished = true;
             DisableEnemies();
-            LevelEnded?.Invoke(this, EventArgs.Empty);
         }
 
-        public void GoToNextLevel()
+        public void RequestTotalCollectables(out int totalCollectables)
+        {
+            totalCollectables = _totalCollectables;
+        }
+
+        public void NextLevelRequested()
         {
             if (_isLevelFinished)
             {
-                GameManager.Instance.LevelFinished();
-                NextLevelStarted?.Invoke(this, EventArgs.Empty);
+                Helpers.DispatchEvent<INextLevelStartedEventTarget>(x => x.NextLevelStarted());
             }            
         }
 
-        public void RestartLevel()
+        public void RestartLevelRequested()
         {
             if (_isLevelFinished)
             {
                 ResetLevel();
-                LevelRestarted?.Invoke(this, EventArgs.Empty);
+                Helpers.DispatchEvent<ILevelRestartedEventTarget>(x => x.LevelRestarted());
+                this.DoNextFrame(x => x.SetupLevel());
             }
         }
 
-        public void OnPlayerPickedUpCollectable(int collectableNum)
+        public void PlayerCollectedCollectable(int collectableNum)
         {
             _collectedCollectables.Add(collectableNum);
-            PlayerPickedUpCollectable?.Invoke(this, _collectedCollectables.Count);
+            Helpers.DispatchEvent<ICollectedCollectablesChangedEventTarget>(x =>
+                x.CollectedCollectablesChanged(_collectedCollectables.Count));
         }
 
-        public void PlayerDied()
+        public void PlayerLivesChanged(int lives)
         {
-            GameManager.Instance.PlayerDied();
-            if (!GameManager.Instance.PlayerHasMoreLives()) return;
-
+            if (lives <= 0) return;
+            
             ResetLevel();
-            StartCoroutine(Helpers.DoNextFrame(this, x => x.SetupLevel()));
+            
+            this.DoNextFrame(x => x.SetupLevel());
         }
 
-        protected override void OnSingletonStart()
+        public void RequestCollectedCollectables(out int collectedCollectables)
+        {
+            collectedCollectables = _collectedCollectables.Count;
+        }
+
+        private void Awake()
+        {
+            var foundGameManagerScene = false;
+            var sceneCount = SceneManager.sceneCount;
+            for (var i = 0; i < sceneCount; i++)
+            {
+                var scene = SceneManager.GetSceneAt(i);
+                if (scene.name == "GameManagerScene")
+                {
+                    foundGameManagerScene = true;
+                    break;
+                }
+            }
+
+            if (!foundGameManagerScene)
+            {
+                SceneManager.LoadScene("GameManagerScene", LoadSceneMode.Additive);
+            }
+        }
+
+        private void Start()
         {
             SetupLevel();
         }
@@ -99,12 +133,9 @@ namespace Core.Managers
 
             _playerTransform.position = _startPoint.position;
 
-            foreach (var requiresSetup in FindObjectsOfType<Object>())
+            foreach (var requiresSetup in Helpers.FindWithInterface<IRequireSetup>())
             {
-                if (requiresSetup is IRequireSetup requireSetup)
-                {
-                    requireSetup.Setup();
-                }
+                requiresSetup.Setup();
             }
 
             Time.timeScale = 1f;
@@ -213,10 +244,9 @@ namespace Core.Managers
 
         private void OnDisable()
         {
-            var objects = FindObjectsOfType<MonoBehaviour>();
-            foreach (var requireTareDown in objects.Where(x => x is IRequireTareDown).Cast<IRequireTareDown>())
+            foreach (var requiresTareDown in Helpers.FindWithInterface<IRequireTareDown>())
             {
-                requireTareDown.TareDown();
+                requiresTareDown.TareDown();
             }
         }
     }

@@ -1,4 +1,6 @@
 ﻿using Core.Managers;
+using Core.MessageTargets;
+using Core.MessageTargets.PlayerEvents;
 using Shared;
 using UnityEngine;
 
@@ -13,8 +15,8 @@ namespace Gameplay
             {
                 return;
             }
-
-            LevelManager.Instance.FinishLevel();
+            
+            Helpers.DispatchEvent<IPlayerReachedFinishEventTarget>(x => x.PlayerReachedFinish());
         }
     }
 }

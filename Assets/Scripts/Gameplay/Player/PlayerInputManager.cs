@@ -1,4 +1,7 @@
 ﻿using Core.Managers;
+using Core.MessageTargets;
+using Core.MessageTargets.GameEvents;
+using Shared;
 using UnityEngine;
 using UnityEngine.InputSystem;
 // ReSharper disable UnusedMember.Global
@@ -49,7 +52,7 @@ namespace Gameplay.Player
         {
             if (ctx.performed)
             {
-                GameManager.Instance.TogglePause();
+                Helpers.DispatchEvent<IGamePauseToggleRequestedEventTarget>(x => x.GamePauseToggleRequested());
             }
         }
 

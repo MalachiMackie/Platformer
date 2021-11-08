@@ -1,5 +1,7 @@
 ﻿using Core;
-using Core.Managers;
+using Core.MessageTargets;
+using Core.MessageTargets.PlayerEvents;
+using Shared;
 using UnityEngine;
 
 namespace Gameplay.Player
@@ -30,7 +32,7 @@ namespace Gameplay.Player
 
         private void Died()
         {
-            LevelManager.Instance.PlayerDied();
+            Helpers.DispatchEvent<IPlayerDiedEventTarget>(x => x.PlayerDied());
         }
     }
 }

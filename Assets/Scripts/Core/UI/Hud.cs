@@ -1,12 +1,19 @@
-﻿using System;
-using Core.Managers;
+﻿using Core.MessageTargets;
+using Core.MessageTargets.LevelEvents;
+using Core.MessageTargets.PlayerEvents;
 using Shared;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Core.UI
 {
-    public class Hud : MonoBehaviour, IRequireSetup, IRequireTareDown
+    public class Hud : MonoBehaviour,
+        IRequireSetup,
+        ICollectedCollectablesChangedEventTarget,
+        IPlayerReachedFinishEventTarget,
+        INextLevelStartedEventTarget,
+        ILevelRestartedEventTarget,
+        IPlayerLivesChangedEventTarget
     {
         [SerializeField] private Text playerLivesText;
         [SerializeField] private string playerLivesTextFormat;
@@ -23,38 +30,36 @@ namespace Core.UI
             Helpers.AssertScriptFieldIsAssignedOrQuit(this, x => x.collectablesText);
             Helpers.AssertIsTrueOrQuit(!string.IsNullOrWhiteSpace(collectablesTextFormat), "hud Player lives text format is not set");
 
-            _totalCollectables = LevelManager.Instance.GetTotalCollectables();
-            SetCollectables(LevelManager.Instance.GetTotalCollectedCollectables(), _totalCollectables);
-            SetPlayerLives(GameManager.Instance.GetPlayerLives());
+            Helpers.DispatchEvent<IRequestTotalCollectablesEventTarget>(x =>
+                x.RequestTotalCollectables(out _totalCollectables));
+            var collectedCollectables = 0;
+
+            Helpers.DispatchEvent<IRequestCollectedCollectablesEventTarget>(x =>
+                x.RequestCollectedCollectables(out collectedCollectables));
             
-            GameManager.Instance.PlayerLivesChanged += OnPlayerLivesChanged;
-            LevelManager.Instance.PlayerPickedUpCollectable += OnPlayerPickedUpCollectable;
-            LevelManager.Instance.LevelEnded += OnLevelEnded;
-            LevelManager.Instance.LevelRestarted += OnLevelRestarted;
-            LevelManager.Instance.NextLevelStarted += OnNextLevelStarted;
+            SetCollectables(collectedCollectables, _totalCollectables);
+
+            var playerLives = 0;
+            Helpers.DispatchEvent<IRequestPlayerLivesEventTarget>(x => x.RequestPlayerLives(out playerLives));
+            SetPlayerLives(playerLives);
         }
 
-        private void OnNextLevelStarted(object sender, EventArgs e)
+        public void NextLevelStarted()
         {
             gameObject.SetActive(true);
         }
 
-        private void OnLevelRestarted(object sender, EventArgs e)
+        public void LevelRestarted()
         {
             gameObject.SetActive(true);
         }
 
-        private void OnLevelEnded(object sender, EventArgs e)
+        public void PlayerReachedFinish()
         {
             gameObject.SetActive(false);
         }
-
-        private void OnPlayerPickedUpCollectable(object sender, int collected)
-        {
-            SetCollectables(collected, _totalCollectables);
-        }
-
-        private void OnPlayerLivesChanged(object sender, int lives)
+        
+        public void PlayerLivesChanged(int lives)
         {
             SetPlayerLives(lives);
         }
@@ -69,13 +74,9 @@ namespace Core.UI
             playerLivesText.text = string.Format(playerLivesTextFormat, lives);
         }
 
-        public void TareDown()
+        public void CollectedCollectablesChanged(int collectedCollectables)
         {
-            GameManager.Instance.PlayerLivesChanged -= OnPlayerLivesChanged;
-            LevelManager.Instance.PlayerPickedUpCollectable -= OnPlayerPickedUpCollectable;
-            LevelManager.Instance.LevelEnded -= OnLevelEnded;
-            LevelManager.Instance.LevelRestarted -= OnLevelRestarted;
-            LevelManager.Instance.NextLevelStarted -= OnNextLevelStarted;
+            SetCollectables(collectedCollectables, _totalCollectables);
         }
     }
 }

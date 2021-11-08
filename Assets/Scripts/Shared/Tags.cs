@@ -9,5 +9,7 @@ namespace Shared
         public const string KillZone = "KillZone";
         public const string StartPoint = "StartPoint";
         public const string Collectable = "Collectable";
+        public const string LevelManager = "LevelManager";
+        public const string Hud = "Hud";
     }
 }

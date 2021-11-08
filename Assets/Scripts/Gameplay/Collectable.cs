@@ -1,4 +1,6 @@
 ﻿using Core.Managers;
+using Core.MessageTargets;
+using Core.MessageTargets.PlayerEvents;
 using Shared;
 using UnityEngine;
 
@@ -18,7 +20,7 @@ namespace Gameplay
         {
             if (col.gameObject.CompareTag(Tags.Player))
             {
-                LevelManager.Instance.OnPlayerPickedUpCollectable(num);
+                Helpers.DispatchEvent<IPlayerCollectedCollectableEventTarget>(x => x.PlayerCollectedCollectable(num));
                 Destroy(gameObject);
             }
         }

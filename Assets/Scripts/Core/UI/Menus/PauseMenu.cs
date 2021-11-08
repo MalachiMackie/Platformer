@@ -1,42 +1,39 @@
 ﻿using System;
 using Core.Managers;
+using Core.MessageTargets;
+using Core.MessageTargets.GameEvents;
+using Shared;
 using UnityEngine;
 
 namespace Core.UI.Menus
 {
-    public class PauseMenu : MonoBehaviour, IRequireSetup, IRequireTareDown
+    public class PauseMenu : MonoBehaviour, IRequireSetup,
+        IGamePausedEventTarget,
+        IGameUnpausedEventTarget
     {
         public void Setup()
         {
-            GameManager.Instance.GamePaused += OnGamePaused;
-            GameManager.Instance.GameUnpaused += OnGameUnpaused;
             gameObject.SetActive(false);
         }
 
         public void Resume()
         {
-            GameManager.Instance.Unpause();
+            Helpers.DispatchEvent<IGameUnpauseRequestedEventTarget>(x => x.GameUnpauseRequested());
         }
 
         public void Quit()
-        {
-            GameManager.Instance.Quit();
+        {            
+            Helpers.DispatchEvent<IGameQuitRequestedEventTarget>(x => x.GameQuitRequested());
         }
 
-        private void OnGamePaused(object sender, EventArgs e)
+        public void GamePaused()
         {
             gameObject.SetActive(true);
         }
 
-        private void OnGameUnpaused(object sender, EventArgs e)
+        public void GameUnpaused()
         {
             gameObject.SetActive(false);
-        }
-
-        public void TareDown()
-        {
-            GameManager.Instance.GamePaused -= OnGamePaused;
-            GameManager.Instance.GameUnpaused -= OnGameUnpaused;
         }
     }
 }
