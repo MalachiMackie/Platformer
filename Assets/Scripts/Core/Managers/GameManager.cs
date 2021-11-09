@@ -104,7 +104,6 @@ namespace Core.Managers
 
         private void Awake()
         {
-            Helpers.EnsureAllEventTargetsHaveImplementations();
             GetLevelNumbers();
         }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.MessageTargets;
 using Core.MessageTargets.LevelEvents;
 using Core.MessageTargets.PlayerEvents;
 using Core.Spawns;
@@ -124,9 +123,6 @@ namespace Core.Managers
             _playerTransform = _playerBehaviour.transform;
             _startPoint = GetStartPoint();
             _isLevelFinished = false;
-            
-            EnsureKillZoneExists();
-            EnsureGoalExists();
 
             SpawnEnemies(); 
             SpawnCollectables();
@@ -181,10 +177,6 @@ namespace Core.Managers
         {
             Helpers.AssertScriptFieldIsAssignedOrQuit(this, x => x.collectablePrefab);
             var collectableSpawns = FindObjectsOfType<CollectableSpawn>();
-            var distinctCollectableSpawnsCount =
-                collectableSpawns.Select(x => x.GetCollectableNum()).Distinct().Count();
-            Helpers.AssertIsTrueOrQuit(distinctCollectableSpawnsCount == collectableSpawns.Length, 
-                "Each collectable spawn must have a unique number");
             foreach (var collectableSpawn in collectableSpawns)
             {
                 if (_collectedCollectables.Contains(collectableSpawn.GetCollectableNum()))
@@ -211,26 +203,6 @@ namespace Core.Managers
             Helpers.AssertScriptFieldIsAssignedOrQuit(this, x => x.playerPrefab);
             var player = Instantiate(playerPrefab);
             return Helpers.AssertGameObjectHasComponent<PlayerBehaviour>(player);
-        }
-
-        private void EnsureKillZoneExists()
-        {
-            var killZones = GameObject.FindGameObjectsWithTag(Tags.KillZone);
-            Helpers.AssertIsTrueOrQuit(killZones.Any(), "Could not find any kill zones in scene");
-            foreach (var killZone in killZones)
-            {
-                Helpers.AssertGameObjectHasComponent<KillZone>(killZone);
-            }
-        }
-
-        private void EnsureGoalExists()
-        {
-            var goals = GameObject.FindGameObjectsWithTag(Tags.Goal);
-            Helpers.AssertIsTrueOrQuit(goals.Any(), "Could not find any goals in the scene");
-            foreach (var goal in goals)
-            {
-                Helpers.AssertGameObjectHasComponent<Goal>(goal);
-            }
         }
 
         private void DisableEnemies()

@@ -149,42 +149,5 @@ namespace Shared
                 func(eventHandler);
             }
         }
-
-        public static void EnsureAllEventTargetsHaveImplementations()
-        {
-            var handlers = new List<Type>();
-            var behaviours = new List<Type>();
-            var allTypes = typeof(Helpers).Assembly.GetTypes();
-
-            var monoBehaviourType = typeof(MonoBehaviour);
-            var eventHandlerType = typeof(IEventSystemHandler);
-
-            foreach (var type in allTypes)
-            {
-                if (type.IsSubclassOf(monoBehaviourType))
-                {
-                    behaviours.Add(type);
-                    continue;
-                }
-
-                if (type.IsInterface && type.GetInterfaces().Any(x => x == eventHandlerType))
-                {
-                    handlers.Add(type);
-                }
-            }
-
-            var missingImplementations = new List<Type>();
-            
-            foreach (var eventSystemHandler in handlers)
-            {
-                if (!behaviours.Any(x => eventSystemHandler.IsAssignableFrom(x)))
-                {
-                    missingImplementations.Add(eventSystemHandler);
-                }
-            }
-
-            AssertIsTrueOrQuit(!missingImplementations.Any(),
-                $"The following event handlers are missing implementations: \n{string.Join(",", missingImplementations.Select(x => x.Name))}");
-        }
     }
 }
